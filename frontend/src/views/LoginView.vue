@@ -4,12 +4,12 @@
       <h2>로그인</h2>
       <form @submit.prevent="handleLogin">
         <div class="input-group">
-          <label>아이디</label>
-          <input v-model="username" type="text" required />
+          <label for="username">아이디</label>
+          <input id="username" name="username" v-model="username" type="text" required />
         </div>
         <div class="input-group">
-          <label>비밀번호</label>
-          <input v-model="password" type="password" required />
+          <label for="password">비밀번호</label>
+          <input id="password" name="password" v-model="password" type="password" required />
         </div>
         <button type="submit">로그인</button>
       </form>
@@ -19,23 +19,35 @@
 
 <script setup>
 import { ref } from 'vue'
-import { userStore } from '../stores/user'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'  // 스토어 경로에 맞게 수정해줘
+
 
 const username = ref('')
 const password = ref('')
-const doLogin = async () => {
-  // 서버에서 로그인 성공 시
+const router = useRouter()
+const userStore = useUserStore()
 
-const handleLogin = () => {
-  console.log('로그인 시도:', username.value, password.value)
-  // TODO: 서버로 로그인 요청 보낼 예정
+
+const handleLogin = async () => {
+  try {
+    const res = await axios.post('http://localhost:8001/auth/login', { //스프링서버 불러오기
+      username: username.value,
+      password: password.value
+    })
+
+
+    alert('로그인 성공!') // 로그인 성공
+
+
+    const { token, username: resUsername } = res.data
+    userStore.login(token, resUsername)
+    router.push('/')
+  } catch (err) {
+    alert('로그인 실패!')
+  }
 }
-
-  const username = 'tester123' // 예: 백엔드 응답에서 가져온 아이디
-  userStore.login(username)
-  router.push('/')
-}
-
 </script>
 
 <style scoped>

@@ -1,35 +1,40 @@
 <template>
-  <div class="register-container">
+  <div>
     <h2>회원가입</h2>
-    <form @submit.prevent="handleRegister">
-      <input type="text" placeholder="아이디" v-model="username" required />
-      <input type="password" placeholder="비밀번호" v-model="password" required />
-      <input type="email" placeholder="이메일" v-model="email" required />
-      <input type="text" placeholder="이름" v-model="name" required />
-      <button type="submit">가입하기</button>
-    </form>
+    <input v-model="username" placeholder="아이디" />
+    <input v-model="password" type="password" placeholder="비밀번호" />
+    <input v-model="email" placeholder="이메일" />
+    <input v-model="name" placeholder="이름" />
+    <button @click="register">가입하기</button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import axios from "axios";
+import { ref } from "vue";
 
-const username = ref('')
-const password = ref('')
-const email = ref('')
-const name = ref('')
+const username = ref("");
+const password = ref("");
+const email = ref("");
+const name = ref("");
 
-const handleRegister = () => {
-  console.log('회원가입 정보:', {
-    username: username.value,
-    password: password.value,
-    email: email.value,
-    name: name.value
-  })
-
-  // 여기에 실제 회원가입 API 연동할 예정!
-}
+const register = async () => {
+  try {
+    await axios.post("http://localhost:8001/auth/register", { //스프링서버
+      username: username.value,
+      password: password.value,
+      email: email.value,
+      name: name.value
+    });
+    alert("가입 성공! 로그인 해주세요");
+    window.location.href = "/login";  // 로그인 페이지로 이동
+  } catch (err) {
+    alert("회원가입 실패 😥");
+    console.error(err);
+  }
+};
 </script>
+
 
 <style scoped>
 .register-container {

@@ -1,8 +1,9 @@
 <script setup>
-import { userStore } from '../stores/user'
+import { useUserStore  } from '../stores/user'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 const goToMyPage = () => {
   if (userStore.isLoggedIn) {
@@ -11,11 +12,42 @@ const goToMyPage = () => {
     alert('로그인이 필요합니다!')
   }
 }
+
+
+
+
+
+
+
+const checkUserStatus = () => {
+  console.log('로그인 상태:', userStore.isLoggedIn)
+  console.log('사용자 이름:', userStore.username)
+  console.log('토큰:', userStore.token) }
 </script>
 
 <template>
+
+
+
+
+    <div>
+      <button @click="checkUserStatus">로그인 후 상태 확인</button>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
   <div class="home">
     <!-- 네비게이션 -->
+
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
       <div class="container">
         <a class="navbar-brand fw-bold text-primary" href="#">MyService</a>

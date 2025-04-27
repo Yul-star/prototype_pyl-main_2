@@ -2,37 +2,35 @@
   <div>
     <h2>회원가입</h2>
     <input v-model="username" placeholder="아이디" />
-    <input v-model="password" type="password" placeholder="비밀번호" />
+    <input v-model="password" placeholder="비밀번호" type="password" />
     <input v-model="email" placeholder="이메일" />
-    <input v-model="name" placeholder="이름" />
-    <button @click="register">가입하기</button>
+    <button @click="register">회원가입</button>
   </div>
 </template>
 
 <script setup>
-import axios from "axios";
-import { ref } from "vue";
+import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const username = ref("");
-const password = ref("");
-const email = ref("");
-const name = ref("");
+const username = ref('')
+const password = ref('')
+const email = ref('')
+const router = useRouter()
 
 const register = async () => {
   try {
-    await axios.post("http://localhost:8001/auth/register", { //스프링서버
+    await axios.post('http://localhost:8001/api/auth/register', {
       username: username.value,
       password: password.value,
-      email: email.value,
-      name: name.value
-    });
-    alert("가입 성공! 로그인 해주세요");
-    window.location.href = "/login";  // 로그인 페이지로 이동
-  } catch (err) {
-    alert("회원가입 실패 😥");
-    console.error(err);
+      email: email.value
+    })
+    alert('회원가입 성공! 로그인 해주세요.')
+    router.push('/login')
+  } catch (error) {
+    alert('회원가입 실패!')
   }
-};
+}
 </script>
 
 

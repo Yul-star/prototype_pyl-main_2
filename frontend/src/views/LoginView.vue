@@ -49,7 +49,7 @@ const handleLogin = async () => {
   }
 }
 
-<button @click="userStore.logout()">로그아웃</button>
+
 
 </script>
 

@@ -1,6 +1,8 @@
 <script setup>
 import { useUserStore  } from '../stores/user'
 import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'   //F12누르면 로그인 상태/유저정보/토큰 볼수 있음
+
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -15,35 +17,21 @@ const goToMyPage = () => {
 
 
 
-
-
-
-
+// ✅ 로그인 상태 확인 함수
 const checkUserStatus = () => {
   console.log('로그인 상태:', userStore.isLoggedIn)
   console.log('사용자 이름:', userStore.username)
   console.log('토큰:', userStore.token) }
+
+
+// ✅ 페이지 진입할 때 자동 호출
+onMounted(() => {
+  checkUserStatus()
+})
+
 </script>
 
 <template>
-
-
-
-
-    <div>
-      <button @click="checkUserStatus">로그인 후 상태 확인</button>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
 
   <div class="home">
     <!-- 네비게이션 -->

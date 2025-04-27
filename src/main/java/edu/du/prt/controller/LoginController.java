@@ -1,55 +1,70 @@
 package edu.du.prt.controller;
 
-import edu.du.prt.entity.Users;
-import edu.du.prt.service.UserService;
+
 import edu.du.prt.dto.LoginRequest;
 import edu.du.prt.jwt.JwtUtil;
+import edu.du.prt.repository.UserRepository;
+import edu.du.prt.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
-//@CrossOrigin(origins = "http://localhost:5173", allowCredentials = true) - webconfig에서 이미 실행중
+@RequestMapping("/api/auth")
 public class LoginController {
 
     @Autowired
-    private UserService userService;
+    private LoginService authService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
 
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<UserRepository> login(@RequestBody LoginRequest loginRequest) {
+        UserRepository response = authService.login(LoginRequest);
+        return ResponseEntity.ok(response);
+    }
+
     // 회원가입
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody Users user) {
-        try {
-            userService.register(user);  // 회원가입 처리
-            return ResponseEntity.ok("회원가입 성공!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 실패 😥");
+    public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
         }
+
+        User user = User.builder()
+                .username(registerRequest.getUsername())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .email(registerRequest.getEmail())
+                .role("USER")
+                .build();
+
+        userRepository.save(user);
+        return ResponseEntity.ok("회원가입 성공!");
     }
 
-    // 로그인 → JWT 토큰 발급
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-        boolean isValid = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
+    // 현재 로그인한 사용자 정보
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
 
-        if (isValid) {
-            // 토큰 생성 후 반환
-            String token = jwtUtil.generateToken(loginRequest.getUsername());
-            return ResponseEntity.ok(token);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패!");
+            return userRepository.findByUsername(username)
+                    .map(user -> ResponseEntity.ok(new LoginResponse(
+                            token,
+                            user.getUsername(),
+                            user.getRole(),
+                            user.getEmail()
+                    )))
+                    .orElse(ResponseEntity.notFound().build());
         }
-    }
-
-    // 로그아웃 → 프론트에서 토큰 삭제만 하면 됨 (백엔드는 처리 안함)
-    @GetMapping("/logout")
-    public ResponseEntity<String> logout() {
-        // JWT는 서버에 세션이 없기 때문에 프론트에서 토큰을 삭제하면 됨
-        return ResponseEntity.ok("로그아웃 완료!");
+        return ResponseEntity.badRequest().body("토큰이 유효하지 않습니다.");
     }
 }

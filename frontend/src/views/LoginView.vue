@@ -32,7 +32,7 @@ const userStore = useUserStore()
 
 const handleLogin = async () => {
   try {
-    const res = await axios.post('http://localhost:8001/auth/login', { //스프링서버 불러오기
+    const res = await axios.post('http://localhost:8001/api/auth/login', { //스프링서버 불러오기
       username: username.value,
       password: password.value
     })
@@ -48,6 +48,9 @@ const handleLogin = async () => {
     alert('로그인 실패!')
   }
 }
+
+<button @click="userStore.logout()">로그아웃</button>
+
 </script>
 
 <style scoped>

@@ -18,11 +18,14 @@ export const useUserStore = defineStore('user', {
             console.log('Logged in:', { username: this.username, token: this.token }) //콘솔 ㅍ출력
         },
         logout() {
-            this.token = ''
-            this.username = ''
+            this.token = null
+            this.username = null
+            this.role = null
+            this.email = null
             localStorage.removeItem('token')
             localStorage.removeItem('username')
-            console.log('Logged out')
+            localStorage.removeItem('role')
+            localStorage.removeItem('email')
         }
     }
 })
